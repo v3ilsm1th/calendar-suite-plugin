@@ -4,7 +4,7 @@
 	"version": "1.0.0",
 	"minAppVersion": "1.5.0",
 	"description": "Three independently insertable views – Month Calendar, Day Overview and Day Timeline – sharing one selected date, styled to match a Notion-like dashboard.",
-	"author": "veilsmith",
-	"authorUrl": "",
+	"author": "Monie",
+	"authorUrl": "https://github.com/v3ilsm1th",
 	"isDesktopOnly": false
 }
