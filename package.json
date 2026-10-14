@@ -1,0 +1,25 @@
+{
+  "name": "obsidian-calendar-suite",
+  "version": "1.0.0",
+  "description": "Calendar Suite – Month Calendar, Day Overview and Day Timeline for Obsidian, sharing one selected date.",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+    "typecheck": "tsc -noEmit -skipLibCheck",
+    "test": "node tests/run.mjs",
+    "install-to-vault": "node esbuild.config.mjs production && node scripts/deploy.mjs"
+  },
+  "keywords": [
+    "obsidian",
+    "calendar",
+    "timeline"
+  ],
+  "author": "veilsmith",
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "^0.24.0",
+    "obsidian": "^1.7.2",
+    "typescript": "^5.6.3"
+  }
+}

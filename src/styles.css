@@ -1,0 +1,1025 @@
+/* ===========================================================================
+   styles.css – Calendar Suite (Obsidian community plugin)
+
+   Visual companion to the views in `src/`:
+     calendar-view.ts   -> .cs-card .cs-cal   month grid, week-number gutter,
+                                        day cells with event/todo dots
+     day-overview.ts    -> .cs-card .cs-day   header of the selected day,
+                                        chips, event rows, todo rows
+     timeline-view.ts   -> .cs-card .cs-tl    day navigation, all-day list,
+                                        hour axis with absolutely
+                                        positioned event/todo blocks
+     dashboard-view.ts  -> .cs-dash           three-slot responsive layout
+     ui.ts              -> shared atoms: .cs-btn, .cs-seg, .cs-chip,
+                                        .cs-badge, .cs-group-*, .cs-empty
+     api.ts             -> .cs-error
+     settings-tab.ts    -> .cs-setting-section, .cs-note (+ --status/--ok/--warn/--info)
+
+   The design language mirrors the Notion-style dashboard snippet
+   (`notion-dashboard.css`): 12px card radius, 13px/16px/15px card padding,
+   faint `rgb(0 0 0 / N%)` shadows, a 0.15s border/shadow hover, uppercase
+   micro-labels and `color-mix()` tints instead of fixed colours.
+
+   Rules of the file:
+     - every colour/background/border comes from an Obsidian theme variable
+       or a color-mix() of one, so light, dark and any custom theme work
+       unchanged; the only literals allowed are the black box-shadows;
+     - all selectors are namespaced with the `cs-` prefix;
+     - numeric and time labels use `font-variant-numeric: tabular-nums`;
+     - buttons stay small and unobtrusive, hovers stay subtle.
+   =========================================================================== */
+
+/* --- 1. Card shell -------------------------------------------------------- */
+
+.cs-card {
+    min-width: 0;
+    font-family: var(--font-interface);
+    background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 12px;
+    padding: 13px 16px 15px;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cs-card:hover {
+    border-color: color-mix(
+        in srgb,
+        var(--interactive-accent) 40%,
+        var(--background-modifier-border)
+    );
+    box-shadow: 0 3px 12px rgb(0 0 0 / 7%);
+}
+
+/* Compact mode: tighter shell and a tighter rhythm inside it. */
+.cs-card.is-compact {
+    padding: 9px 11px 11px;
+}
+
+.cs-card.is-compact .cs-cal-head {
+    margin-bottom: 6px;
+}
+
+.cs-card.is-compact .cs-day-head {
+    padding-bottom: 7px;
+}
+
+.cs-card.is-compact .cs-chips {
+    gap: 6px;
+    margin-bottom: 0.4em;
+}
+
+.cs-card.is-compact .cs-group {
+    margin-top: 7px;
+}
+
+.cs-card.is-compact .cs-group-head {
+    margin: 0.6em 0 0.15em;
+}
+
+/* --- 2. Eyebrow, pills, chips, badges ------------------------------------- */
+
+.cs-eyebrow {
+    color: var(--text-muted);
+    font-size: 0.74em;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.cs-pill {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 8px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 999px;
+    background: var(--background-secondary);
+    color: var(--text-muted);
+    font-size: 0.7em;
+    font-weight: 700;
+    line-height: 1.5;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+.cs-pill--today {
+    background: color-mix(in srgb, var(--interactive-accent) 18%, transparent);
+    border-color: color-mix(in srgb, var(--interactive-accent) 45%, transparent);
+    color: var(--text-accent);
+}
+
+.cs-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 0.7em;
+}
+
+.cs-chips--tight {
+    gap: 5px;
+    margin-bottom: 0;
+}
+
+.cs-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    color: var(--text-muted);
+    font-size: 0.85em;
+    line-height: 1.5;
+}
+
+.cs-chip b {
+    color: var(--text-normal);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.cs-chip--accent {
+    background: color-mix(in srgb, var(--interactive-accent) 20%, transparent);
+    border-color: color-mix(in srgb, var(--interactive-accent) 50%, transparent);
+    color: var(--text-accent);
+}
+
+.cs-badge {
+    flex: none;
+    min-width: 22px;
+    padding: 1px 7px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 999px;
+    background: var(--background-secondary);
+    color: var(--text-muted);
+    font-size: 0.76em;
+    font-weight: 700;
+    line-height: 1.55;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+.cs-badge--accent {
+    background: color-mix(in srgb, var(--interactive-accent) 20%, transparent);
+    border-color: color-mix(in srgb, var(--interactive-accent) 50%, transparent);
+    color: var(--text-accent);
+}
+
+/* --- 3. Groups, lists, empty states, section labels ------------------------ */
+
+.cs-group {
+    margin-top: 11px;
+}
+
+.cs-group-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 0.85em 0 0.25em;
+    padding-bottom: 3px;
+}
+
+.cs-group-title {
+    color: var(--text-muted);
+    font-size: 0.74em;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.cs-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.cs-empty {
+    margin: 0.25em 0;
+    color: var(--text-faint);
+    font-size: 0.9em;
+    font-style: italic;
+}
+
+.cs-section-label {
+    margin: 9px 0 2px;
+    color: var(--text-faint);
+    font-size: 0.68em;
+    font-weight: 750;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+/* --- 4. Actions, buttons, icon buttons, segmented control, error ----------- */
+
+.cs-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.cs-btn {
+    appearance: none;
+    flex: none;
+    font: inherit;
+    font-size: 0.82em;
+    font-weight: 600;
+    line-height: 1.5;
+    padding: 4px 11px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 8px;
+    background: var(--background-secondary);
+    color: var(--text-normal);
+    cursor: pointer;
+    transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.cs-btn:hover {
+    border-color: color-mix(
+        in srgb,
+        var(--interactive-accent) 55%,
+        var(--background-modifier-border)
+    );
+}
+
+.cs-btn:focus-visible {
+    outline: 2px solid var(--interactive-accent);
+    outline-offset: 1px;
+}
+
+.cs-btn--sm {
+    appearance: none;
+    flex: none;
+    font: inherit;
+    font-size: 0.76em;
+    line-height: 1.5;
+    padding: 3px 9px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 7px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+
+.cs-btn--sm:hover {
+    background: var(--background-secondary);
+    color: var(--text-normal);
+}
+
+.cs-btn--sm:focus-visible {
+    outline: 2px solid var(--interactive-accent);
+    outline-offset: 1px;
+}
+
+/* Declared after `.cs-btn--sm` so `cs-btn cs-btn--sm cs-btn--accent`
+   (the "New journal entry" button) keeps the accent fill. */
+.cs-btn--accent {
+    background: color-mix(in srgb, var(--interactive-accent) 18%, var(--background-primary));
+    border-color: color-mix(in srgb, var(--interactive-accent) 55%, transparent);
+    color: var(--text-normal);
+}
+
+.cs-icon-btn {
+    appearance: none;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: 1em;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+
+.cs-icon-btn:hover {
+    background: var(--background-secondary);
+    color: var(--text-normal);
+}
+
+.cs-icon-btn:focus-visible {
+    outline: 2px solid var(--interactive-accent);
+    outline-offset: 1px;
+}
+
+.cs-seg {
+    flex: none;
+    display: inline-flex;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--background-secondary);
+}
+
+.cs-seg-item {
+    appearance: none;
+    padding: 3px 10px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: 0.76em;
+    line-height: 1.5;
+    cursor: pointer;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+
+.cs-seg-item:hover {
+    color: var(--text-normal);
+}
+
+.cs-seg-item.is-active {
+    background: var(--background-primary);
+    color: var(--text-normal);
+    font-weight: 650;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 6%);
+}
+
+.cs-seg-item:focus-visible {
+    outline: 2px solid var(--interactive-accent);
+    outline-offset: -2px;
+}
+
+.cs-error {
+    margin: 0.3em 0;
+    padding: 8px 12px;
+    border: 1px solid color-mix(in srgb, var(--color-red) 40%, transparent);
+    background: color-mix(in srgb, var(--color-red) 10%, transparent);
+    color: var(--color-red);
+    border-radius: 8px;
+    font-size: 0.9em;
+}
+
+/* --- 5. Month calendar ----------------------------------------------------- */
+
+.cs-cal {
+    min-width: 0;
+}
+
+.cs-cal-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 9px;
+}
+
+.cs-cal-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: center;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.cs-cal-today {
+    margin-left: 4px;
+}
+
+.cs-cal-weeks,
+.cs-cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.cs-cal-weeks {
+    margin-bottom: 3px;
+}
+
+/* Week-number gutter: one label column plus the seven day columns. */
+.cs-cal-weeks.has-weeks,
+.cs-cal-grid.has-weeks {
+    grid-template-columns: minmax(2.1em, auto) repeat(7, 1fr);
+}
+
+.cs-wd {
+    padding: 3px 0 1px;
+    color: var(--text-faint);
+    font-size: 0.68em;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.cs-wd--week {
+    text-align: right;
+    font-size: 0.6em;
+}
+
+.cs-week-num {
+    align-self: center;
+    color: var(--text-faint);
+    font-family: var(--font-monospace);
+    font-size: 0.62em;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Day cells. The day-overview card carries the `cs-day` name as well, so the
+   cell treatment is restricted to elements that are not the card itself. */
+.cs-day:not(.cs-card) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    min-height: 44px;
+    padding: 5px 2px 4px;
+    border: 1.5px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.12s ease, border-color 0.12s ease, opacity 0.12s ease;
+}
+
+.cs-day:not(.cs-card):hover {
+    background: var(--background-secondary);
+}
+
+.cs-day:not(.cs-card):focus-visible {
+    outline: 2px solid var(--interactive-accent);
+    outline-offset: -2px;
+}
+
+.cs-day.is-outside {
+    opacity: 0.4;
+}
+
+.cs-day.is-outside:hover {
+    opacity: 0.8;
+}
+
+.cs-day.is-weekend .cs-day-num {
+    color: var(--text-muted);
+}
+
+.cs-day.is-today {
+    border-color: var(--interactive-accent);
+}
+
+.cs-day.is-today .cs-day-num {
+    color: var(--text-accent);
+    font-weight: 800;
+}
+
+/* Declared last so a selected day keeps its fill while hovered. */
+.cs-day.is-selected,
+.cs-day.is-selected:hover {
+    background: var(--interactive-accent);
+    border-color: var(--interactive-accent);
+    opacity: 1;
+}
+
+.cs-day.is-selected .cs-day-num {
+    color: var(--text-on-accent);
+    font-weight: 800;
+}
+
+.cs-day-num {
+    font-size: 0.86em;
+    font-weight: 600;
+    line-height: 1.3;
+    font-variant-numeric: tabular-nums;
+}
+
+.cs-day-dots {
+    display: flex;
+    gap: 3px;
+    min-height: 5px;
+    align-items: center;
+}
+
+.cs-dot {
+    flex: none;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+}
+
+.cs-dot--event {
+    background: var(--color-blue);
+}
+
+.cs-dot--todo {
+    background: var(--interactive-accent);
+}
+
+.cs-day.is-selected .cs-dot {
+    background: var(--text-on-accent);
+}
+
+/* --- 6. Day overview ------------------------------------------------------- */
+
+.cs-day-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.cs-day-heading-block {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    align-items: flex-start;
+}
+
+.cs-day-heading {
+    font-size: 1.06em;
+    font-weight: 750;
+    line-height: 1.3;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Todos */
+
+.cs-todo {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 5px 8px;
+    border-radius: 8px;
+    transition: background 0.12s ease;
+}
+
+.cs-todo:hover {
+    background: var(--background-secondary);
+}
+
+.cs-todo.is-done {
+    opacity: 0.6;
+}
+
+.cs-todo-check {
+    flex: none;
+    margin: 3px 0 0;
+    accent-color: var(--interactive-accent);
+    cursor: pointer;
+}
+
+.cs-todo-body {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.cs-todo-text {
+    font-family: var(--font-text);
+    font-size: 0.92em;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.cs-todo-text.is-done {
+    color: var(--text-faint);
+    text-decoration: line-through;
+}
+
+.cs-todo-source {
+    color: var(--text-faint);
+    font-size: 0.75em;
+    text-decoration: none;
+}
+
+.cs-todo-source:hover {
+    color: var(--text-accent);
+}
+
+/* Event / todo rows (day overview and timeline list mode) */
+
+.cs-row {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 5px 8px;
+    border-radius: 8px;
+    min-width: 0;
+    cursor: pointer;
+    transition: background 0.12s ease;
+}
+
+.cs-row:hover {
+    background: var(--background-secondary);
+}
+
+.cs-row:focus-visible {
+    outline: 2px solid var(--interactive-accent);
+    outline-offset: -2px;
+}
+
+.cs-row-time {
+    flex: none;
+    min-width: 4.6em;
+    padding: 1px 7px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 6px;
+    background: var(--background-secondary);
+    color: var(--text-accent);
+    font-size: 0.75em;
+    font-weight: 650;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.cs-row--event .cs-row-time {
+    color: var(--color-blue);
+}
+
+.cs-row--todo .cs-row-time {
+    color: var(--text-accent);
+}
+
+.cs-row-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    color: var(--text-normal);
+    font-size: 0.93em;
+    font-weight: 600;
+    line-height: 1.4;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+}
+
+.cs-row-title:hover {
+    color: var(--text-accent);
+    text-decoration: underline;
+}
+
+/* --- 7. Timeline ------------------------------------------------------------ */
+
+.cs-tl {
+    min-width: 0;
+}
+
+.cs-tl-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.cs-tl-nav {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.cs-tl-date {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    min-width: 0;
+}
+
+.cs-tl-date > span:first-child {
+    font-size: 0.85em;
+    font-weight: 700;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.cs-tl-weekday {
+    color: var(--text-muted);
+    font-size: 0.78em;
+    text-transform: capitalize;
+}
+
+.cs-tl-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+}
+
+.cs-tl-allday {
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed var(--background-modifier-border);
+}
+
+.cs-tl-nothing {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 8px;
+}
+
+.cs-tl-axis {
+    margin-top: 6px;
+}
+
+/* Hour axis. `--cs-hour-h` is the single knob: every hour row is exactly
+   that tall and the absolutely positioned blocks read the same variable,
+   so compact mode only has to change one number. */
+.cs-tl-grid {
+    --cs-hour-h: 40px;
+    --cs-hour-label-w: 3.7em;
+    --cs-hour-count: 24;
+    position: relative;
+}
+
+.cs-tl-hour {
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: var(--cs-hour-label-w) minmax(0, 1fr);
+    gap: 7px;
+    height: var(--cs-hour-h);
+    border-top: 1px solid var(--background-modifier-border);
+}
+
+.cs-tl-hour:first-child {
+    border-top: none;
+}
+
+.cs-tl-hour-label {
+    padding-top: 4px;
+    color: var(--text-faint);
+    font-family: var(--font-monospace);
+    font-size: 0.66em;
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.cs-tl-hour.is-past {
+    opacity: 0.5;
+}
+
+.cs-tl-hour.is-now {
+    border-top-color: var(--interactive-accent);
+}
+
+.cs-tl-hour.is-now .cs-tl-hour-label {
+    color: var(--text-accent);
+    font-weight: 750;
+}
+
+.cs-tl-hour-slot {
+    min-width: 0;
+    padding-top: 4px;
+}
+
+/* Sits above the absolutely positioned block layer (z-index 3). */
+.cs-now-chip {
+    position: relative;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--interactive-accent) 14%, transparent);
+    color: var(--text-accent);
+    font-size: 0.68em;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* Block layer: exactly the content column of `.cs-tl-hour`
+   (label column `var(--cs-hour-label-w)` + `gap: 7px`). */
+.cs-tl-layer {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(var(--cs-hour-label-w) + 7px);
+    right: 0;
+    pointer-events: none;
+}
+
+.cs-block {
+    position: absolute;
+    box-sizing: border-box;
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 18px;
+    padding: 2px 7px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 7px;
+    background: var(--background-secondary);
+    color: var(--text-normal);
+    overflow: hidden;
+    font-size: 0.78em;
+    line-height: 1.3;
+    cursor: pointer;
+    transition: box-shadow 0.12s ease, border-color 0.12s ease;
+}
+
+.cs-block:hover {
+    box-shadow: 0 2px 8px rgb(0 0 0 / 12%);
+}
+
+.cs-block:focus-visible {
+    outline: 2px solid var(--interactive-accent);
+    outline-offset: 1px;
+}
+
+/* 16% tint over the card keeps both themes readable under --text-normal. */
+.cs-block--event {
+    background: color-mix(in srgb, var(--color-blue) 16%, var(--background-primary));
+    border-color: color-mix(in srgb, var(--color-blue) 45%, transparent);
+    border-left: 3px solid var(--color-blue);
+    color: var(--text-normal);
+}
+
+.cs-block--todo {
+    background: color-mix(in srgb, var(--interactive-accent) 16%, var(--background-primary));
+    border-color: color-mix(in srgb, var(--interactive-accent) 45%, transparent);
+    border-left: 3px solid var(--interactive-accent);
+    color: var(--text-normal);
+}
+
+.cs-block-time {
+    flex: none;
+    color: var(--text-muted);
+    font-family: var(--font-monospace);
+    font-size: 0.92em;
+    font-variant-numeric: tabular-nums;
+}
+
+.cs-block-title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+}
+
+.cs-tl-list {
+    margin-top: 6px;
+}
+
+/* --- 8. Full dashboard layout ---------------------------------------------- */
+
+.cs-dash {
+    --cs-gap: 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+    gap: var(--cs-gap, 16px);
+    align-items: start;
+    min-width: 0;
+    margin: 0.4em 0 1.1em;
+}
+
+/* Timeline spans the full width underneath calendar + day overview … */
+.cs-dash-tl {
+    grid-column: 1 / -1;
+}
+
+/* Grid children must be allowed to shrink below their content width,
+   otherwise a wide month grid or timeline blows the column open. */
+.cs-dash-cal,
+.cs-dash-day,
+.cs-dash-tl {
+    min-width: 0;
+}
+
+/* --- 9. Compact mode (`.is-compact` sits on the card) ---------------------- */
+
+.cs-card.is-compact .cs-day {
+    min-height: 38px;
+}
+
+.cs-card.is-compact .cs-cal-weeks,
+.cs-card.is-compact .cs-cal-grid {
+    gap: 3px;
+}
+
+.cs-card.is-compact .cs-row,
+.cs-card.is-compact .cs-todo {
+    padding: 3px 6px;
+}
+
+.cs-card.is-compact .cs-tl-grid {
+    --cs-hour-h: 34px;
+}
+
+/* --- 10. Responsive --------------------------------------------------------- */
+
+/* Room for calendar | day overview | timeline side by side. */
+@media (min-width: 1560px) {
+    .cs-dash {
+        grid-template-columns: minmax(280px, 0.85fr) minmax(320px, 1fr) minmax(340px, 1.1fr);
+    }
+
+    .cs-dash-tl {
+        grid-column: 3;
+        grid-row: 1;
+    }
+}
+
+/* Narrow screens: one column, tighter gaps. */
+@media (max-width: 700px) {
+    .cs-dash {
+        --cs-gap: 12px;
+        grid-template-columns: 1fr;
+    }
+
+    .cs-dash-tl {
+        grid-column: 1;
+        grid-row: auto;
+    }
+}
+
+/* Small phones: wrapped calendar header, denser cells, stacked timeline head. */
+@media (max-width: 480px) {
+    .cs-cal-head {
+        flex-wrap: wrap;
+    }
+
+    .cs-cal-title {
+        order: -1;
+        flex: 1 1 100%;
+        text-align: left;
+    }
+
+    .cs-day:not(.cs-card) {
+        min-height: 40px;
+    }
+
+    .cs-tl-head {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .cs-tl-nav {
+        flex-wrap: wrap;
+    }
+}
+
+/* --- 11. Settings tab (notes + section headings) ---------------------------- */
+
+/* Section heading inside the settings tab body ("Data", "Templates", …). */
+.cs-setting-section {
+    margin: 1.6em 0 0.6em;
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid var(--background-modifier-border);
+    font-size: 1.05em;
+    font-weight: 700;
+}
+
+/* First heading in the tab should not sit flush against the top. */
+.cs-setting-section:first-child {
+    margin-top: 0.4em;
+}
+
+/* Static explanatory note under a setting. */
+.cs-note {
+    margin: 0.2em 0 0;
+    padding: 6px 10px;
+    border-left: 3px solid var(--background-modifier-border);
+    border-radius: 0 6px 6px 0;
+    background: color-mix(in srgb, var(--text-muted) 7%, transparent);
+    color: var(--text-muted);
+    font-size: 0.85em;
+    line-height: 1.45;
+}
+
+/* Validation note rendered after "Apply"; removed and re-added on every run. */
+.cs-note--status {
+    margin: 0.4em 0 0;
+    border-radius: 6px;
+    border-left-width: 3px;
+}
+
+.cs-note--ok {
+    border-left-color: var(--color-green);
+    background: color-mix(in srgb, var(--color-green) 9%, transparent);
+    color: var(--text-normal);
+}
+
+.cs-note--warn {
+    border-left-color: var(--color-orange);
+    background: color-mix(in srgb, var(--color-orange) 10%, transparent);
+    color: var(--text-normal);
+}
+
+.cs-note--info {
+    border-left-color: var(--color-blue);
+    background: color-mix(in srgb, var(--color-blue) 8%, transparent);
+    color: var(--text-normal);
+}
