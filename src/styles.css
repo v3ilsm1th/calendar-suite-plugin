@@ -15,18 +15,6 @@
      api.ts             -> .cs-error
      settings-tab.ts    -> .cs-setting-section, .cs-note (+ --status/--ok/--warn/--info)
 
-   The design language mirrors the Notion-style dashboard snippet
-   (`notion-dashboard.css`): 12px card radius, 13px/16px/15px card padding,
-   faint `rgb(0 0 0 / N%)` shadows, a 0.15s border/shadow hover, uppercase
-   micro-labels and `color-mix()` tints instead of fixed colours.
-
-   Rules of the file:
-     - every colour/background/border comes from an Obsidian theme variable
-       or a color-mix() of one, so light, dark and any custom theme work
-       unchanged; the only literals allowed are the black box-shadows;
-     - all selectors are namespaced with the `cs-` prefix;
-     - numeric and time labels use `font-variant-numeric: tabular-nums`;
-     - buttons stay small and unobtrusive, hovers stay subtle.
    =========================================================================== */
 
 /* --- 1. Card shell -------------------------------------------------------- */
