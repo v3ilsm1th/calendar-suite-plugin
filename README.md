@@ -1,6 +1,6 @@
 # Calendar Suite
 
-A self-contained Obsidian plugin that gives you three calendar views — **Month Calendar**, **Day Overview** and **Day Timeline** — that always share one selected date. It is styled after the Notion-style dashboard in this vault (all colors come from Obsidian theme variables), and it integrates with your existing dashboard without replacing it.
+A self-contained Obsidian plugin that gives you three calendar views — **Month Calendar**, **Day Overview** and **Day Timeline** — that always share one selected date. 
 
 <img width="1694" height="728" alt="image" src="https://github.com/user-attachments/assets/f0de628b-4a36-4807-8094-66f86f9ab633" />
 
